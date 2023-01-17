@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { invoke } from '@tauri-apps/api/tauri'
 
-
 const config = {
 	// Mysql DEV
 	"mysql_dev": `host = "10.30.4.114:3306"
@@ -80,7 +79,7 @@ function ConsulHelper() {
 
 
 
-return
+		return
 
 
         fetch(url, {
