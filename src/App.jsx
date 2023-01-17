@@ -4,16 +4,21 @@ import "./App.css"
 import ConsulHelper from './containers/ConsulHelper'
 import Flow from './containers/Flow'
 
+const pages = [
+  <Flow />, 
+  <ConsulHelper />
+]
+
 export default () => {
   const [page, setPage] = useState(0);
 
   const handleKeyPress = useCallback((event) => {
     switch (event.key) {
         case "ArrowLeft":
-          setPage(page => page -1)
+          setPage(page => page > 0 ? page -1 : page)
           break;
         case "ArrowRight":
-          setPage(page => page +1)
+          setPage(page => page < pages.length -1 ? page +1 : page)
           break;
     }
   }, [page]);
@@ -27,8 +32,5 @@ export default () => {
     };
   },[]);
 
-  return [
-    <Flow />, 
-    <ConsulHelper />
-  ][page]
+  return pages[page]
 }
