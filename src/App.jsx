@@ -14,8 +14,7 @@ import { appWindow } from '@tauri-apps/api/window';
 
 import { ChevronRightIcon, RepeatClockIcon } from '@chakra-ui/icons'
 
-
-
+import ConsulHelper from './containers/consuleHelper'
 
 
 // When using the Tauri API npm package:
@@ -128,4 +127,18 @@ function App() {
   );
 }
 
-export default App;
+
+
+function Entry() {
+  const [page, setPage] = useState(2);
+
+  switch (page) {
+    case 1:
+      return App()
+    case 2:
+      return ConsulHelper()
+  }
+
+}
+
+export default Entry;
