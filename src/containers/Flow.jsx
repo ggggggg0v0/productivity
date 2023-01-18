@@ -1,6 +1,5 @@
 
-import { IconButton, Flex, Text, Box } from "@chakra-ui/react";
-import { ChakraProvider } from '@chakra-ui/react'
+import { IconButton, Flex, Text, Box, Button, ChakraProvider } from "@chakra-ui/react";
 import { useEffect, useState, useCallback } from "react";
 import { sendNotification } from "@tauri-apps/api/notification";
 import { ask } from "@tauri-apps/api/dialog";
@@ -13,27 +12,26 @@ import { appWindow } from '@tauri-apps/api/window';
 
 import { ChevronRightIcon, RepeatClockIcon } from '@chakra-ui/icons'
 
+// const buttons = [
+//   {
+//     value: 1500,
+//     display: "25",
+//   },
+//   {
+//     value: 1800,
+//     display: "30",
+//   },
+//   {
+//     value: 3600,
+//     display: "60",
+//   },
+// ];
 
 function Flow() {
-    const initTime = 3
-    const initResetTime = 15
+    const initTime = 1500
+    const initResetTime = 300
     const [time, setTime] = useState(initTime);
     const [timerStart, setTimerStart] = useState(false);
-  
-    const buttons = [
-      {
-        value: 900,
-        display: "15 minutes",
-      },
-      {
-        value: 1800,
-        display: "30 minutes",
-      },
-      {
-        value: 3600,
-        display: "60 minutes",
-      },
-    ];
   
     const toggleTimer = () => {
       setTimerStart(!timerStart);
@@ -52,10 +50,6 @@ function Flow() {
           if (time > 0) {
             setTime(time - 1);
           } else if (time === 0) {
-            // sendNotification({
-            //     title: `Time's up!`,
-            //     body: `Congrats on completing a session!🎉`,
-            // });
             appWindow.setFullscreen(true);
             clearInterval(interval);
           }
@@ -102,15 +96,23 @@ function Flow() {
               border='none'
               boxShadow='none'
             />
-            {/* <Button
-              background="blue.300"
-              marginX={5}
-              onClick={triggerResetDialog}
-            >
-             Reset
-            </Button> */}
           </Flex>
-  
+          {/* <Flex marginTop={10}>
+          {buttons.map(({ value, display }) => (
+            <Button
+              key={value}
+              size='sm'
+              marginX={4}
+              background="green.700"
+              onClick={() => {
+                setTimerStart(false);
+                setTime(value);
+              }}
+            >
+              {display}
+            </Button>
+          ))}
+        </Flex> */}
         </Flex>
       </div>
       </ChakraProvider>

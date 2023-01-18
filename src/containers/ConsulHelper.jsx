@@ -3,6 +3,15 @@ import { useEffect, useState } from "react";
 import { invoke } from '@tauri-apps/api/tauri'
 
 const config = {
+	// Mysql Local
+	"mysql_local": `host = "localhost:3306"
+account = "PTDNecessitas_seed"
+password = "7MHuMgbIJeN_cc"
+dbname = "promoteMS"
+max_open_conns = 50
+max_idle_conns = 25
+max_conn_lifetime = "60s"`,
+
 	// Mysql DEV
 	"mysql_dev": `host = "10.30.4.114:3306"
 account = "PTDNecessitas_seed"
@@ -27,6 +36,18 @@ dbname = "promoteMS"
 max_open_conns = 50
 max_idle_conns = 25
 max_conn_lifetime = "60s"`,
+
+	// Mongo DEV
+	"mongo_local": `host=[
+"localhost:27017"
+]
+dbname="admin"
+poollimit=50
+maxIdleTimeMS=300000
+minPoolSize=25
+account="root"
+password="testtest"
+pool_size=10`,
 
 	// Mongo DEV
 	"mongo_dev": `host=[
@@ -67,126 +88,90 @@ pool_size=10`,
 
 
 function ConsulHelper() {
-
     const onChange = (event) => {
-        // split `mysql.master.dev` to ['mysql', 'master', 'dev']
         const arg = event.target.value.split('.')
         const [dbType, ms, env] = [arg[0], arg[1], arg[2]]
         const url = `http://127.0.0.1:8500/v1/kv/storage/${dbType}/${ms}/promote-ms?dc=dc1&flags=0`
 
-
         invoke('fetch',{ invokeMessage: config[`${dbType}_${env}`], url }).then((message) => console.log("heyhet", message))
-
-
-
 		return
-
-
-        fetch(url, {
-            "headers": {
-                "accept": "*/*",
-                "accept-language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
-                "content-type": "application/json; charset=UTF-8",
-                "sec-ch-ua-platform": "\"macOS\"",
-                "sec-fetch-dest": "empty",
-                "sec-fetch-mode": "cors",
-                "sec-fetch-site": "same-origin",
-                "x-consul-token": "",
-                "x-requested-with": "XMLHttpRequest",
-                "Referrer-Policy": "strict-origin-when-cross-origin"
-              },
-            "body": config[`${dbType}_${env}`],
-            "method": "PUT"
-          }).then((response) => {
-            if (response.ok) {
-              return response.json();
-            }
-            throw new Error('Something went wrong');
-          })
-          .then((responseJson) => {
-            // Do something with the response
-          })
-          .catch((error) => {
-            console.log(error)
-          });
-
-        // fetch('/helper/consul', {
-        //     method: 'POST',
-        //     body: JSON.stringify({ "data": this.value }),
-        //     headers: { 'Content-Type': 'application/json' },
-        // })
     }
 
+	return (
+		<>
+				<span>MySQL-Master</span>
+				<div>
+					<div>
+					<input name="mysql_master" value="mysql.master.dev" type="radio" onChange={onChange} required />
+					<label>Dev</label>
+					</div>
+					<div>
+					<input name="mysql_master" value="mysql.master.qa" type="radio" onChange={onChange} required />
+					<label>QA</label>
+					</div>
+					<div>
+						<input name="mysql_master" value="mysql.master.sit" type="radio" onChange={onChange} required />
+						<label>Sit</label>
+					</div>
 
-return (
-    <>
-              <span>MySQL-Master</span>
-			<div>
+					<span>MySQL-Slave</span>
 				<div>
-				<input name="mysql_master" value="mysql.master.dev" type="radio" onChange={onChange} required />
-				<label>Dev</label>
-				</div>
-				<div>
-				<input name="mysql_master" value="mysql.master.qa" type="radio" onChange={onChange} required />
-				<label>QA</label>
-				</div>
-				<div>
-					<input name="mysql_master" value="mysql.master.sit" type="radio" onChange={onChange} required />
-					<label>Sit</label>
+					<div>
+					<input name="mysql_slave" value="mysql.slave.dev" type="radio" onChange={onChange} required />
+					<label>Dev</label>
+					</div>
+					<div>
+					<input name="mysql_slave" value="mysql.slave.qa" type="radio" onChange={onChange} required />
+					<label>QA</label>
+					</div>
+					<div>
+						<input name="mysql_slave" value="mysql.slave.sit" type="radio" onChange={onChange} required />
+						<label>Sit</label>
+					</div>
 				</div>
 
-				<span>MySQL-Slave</span>
-			<div>
+					<span>Mongo-Master</span>
 				<div>
-				<input name="mysql_slave" value="mysql.slave.dev" type="radio" onChange={onChange} required />
-				<label>Dev</label>
+					<div>
+						<input name="mongo_master" value="mongo.master.local" type="radio" onChange={onChange} required />
+						<label>Local</label>
+					</div>
+					<div>
+						<input name="mongo_master" value="mongo.master.dev" type="radio" onChange={onChange} required />
+						<label>Dev</label>
+					</div>
+					<div>
+						<input name="mongo_master" value="mongo.master.qa" type="radio" onChange={onChange} required />
+						<label>QA</label>
+					</div>
+					<div>
+						<input name="mongo_master" value="mongo.master.sit" type="radio" onChange={onChange} required />
+						<label>Sit</label>
+					</div>
 				</div>
-				<div>
-				<input name="mysql_slave" value="mysql.slave.qa" type="radio" onChange={onChange} required />
-				<label>QA</label>
-				</div>
-				<div>
-					<input name="mysql_slave" value="mysql.slave.sit" type="radio" onChange={onChange} required />
-					<label>Sit</label>
-				</div>
-			</div>
 
-				<span>Mongo-Master</span>
-			<div>
+					<span>Mongo-Slave</span>
 				<div>
-					<input name="mongo_master" value="mongo.master.dev" type="radio" onChange={onChange} required />
+				<div>
+					<input name="mongo_slave" value="mongo.slave.local" type="radio" onChange={onChange} required />
+					<label>Local</label>
+				</div>
+				<div>
+					<input name="mongo_slave" value="mongo.slave.dev" type="radio" onChange={onChange} required />
 					<label>Dev</label>
 				</div>
 				<div>
-					<input name="mongo_master" value="mongo.master.qa" type="radio" onChange={onChange} required />
+					<input name="mongo_slave" value="mongo.slave.qa" type="radio" onChange={onChange} required />
 					<label>QA</label>
 				</div>
 				<div>
-					<input name="mongo_master" value="mongo.master.sit" type="radio" onChange={onChange} required />
+					<input name="mongo_slave" value="mongo.slave.sit" type="radio" onChange={onChange} required />
 					<label>Sit</label>
 				</div>
 			</div>
-
-				<span>Mongo-Slave</span>
-			<div>
-			<div>
-				<input name="mongo_slave" value="mongo.slave.dev" type="radio" onChange={onChange} required />
-				<label>Dev</label>
 			</div>
-			<div>
-				<input name="mongo_slave" value="mongo.slave.qa" type="radio" onChange={onChange} required />
-				<label>QA</label>
-			</div>
-			<div>
-				<input name="mongo_slave" value="mongo.slave.sit" type="radio" onChange={onChange} required />
-				<label>Sit</label>
-			</div>
-		</div>
-          </div>
-          </>
-)
+		</>
+	)
+}
 
-
-  }
-
-  export default ConsulHelper
+export default ConsulHelper
