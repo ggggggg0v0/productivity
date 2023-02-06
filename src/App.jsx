@@ -10,7 +10,7 @@ const pages = [
 ]
 
 export default () => {
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
 
   const handleKeyPress = useCallback((event) => {
     switch (event.key) {
