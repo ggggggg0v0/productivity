@@ -17,7 +17,7 @@ const ServerList = [
     'notify',
     'pay-addition-card',
     'i18n'
-]
+].sort()
 
 const running =  {}
 
@@ -73,17 +73,20 @@ class Config {
 
     GeneratePort(serverName) {
         let newRunningList = { ...this.running }
+        let serverPort
 
         let ok = newRunningList[serverName]
         if (!ok) {
             port ++
+            serverPort = port
             newRunningList[serverName] = port
         } else {
+            serverPort = newRunningList[serverName]
             delete newRunningList[serverName]
         }
 
         this.running = newRunningList
-        return port
+        return serverPort
     }
 
     GetNewSetting() {

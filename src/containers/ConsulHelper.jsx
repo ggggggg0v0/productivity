@@ -2,33 +2,27 @@
 import { useState } from "react";
 import { invoke } from '@tauri-apps/api/tauri'
 import Config from '../config/config'
+import { useCallback } from "react";
 
 const serverList = [
-	"bet-accumulator",
-	"bet-accumulator-audit",
-	"code",
-	"config",
-	"cron-job",
-	"decoration",
-	"external",
-	"ez-login",
-	"fortune-recommend",
-	"free-ticket",
-	"i18n",
-	"marquee",
-	"mission",
-	"ms",
-	"ms-panel",
-	"ms_tool",
-	"notify",
-	"order-filter",
-	"pay-addition-card",
-	"point",
-	"reward",
-	"tool",
-	"user",
-	"user-profile",
-]
+    'bet-accumulator',
+    'bet-accumulator-audit',
+    'config',
+    'free-ticket',
+    'mission',
+    'ms',
+    'external',
+    'point',
+    'user',
+    'marquee',
+    'decoration',
+    'reward',
+    'fortune-recommend',
+    'ms-panel',
+    'notify',
+    'pay-addition-card',
+    'i18n'
+].sort()
 
 const coolInfoStyle = 'background-color: darkblue; color: white; font-style: italic; border: 5px solid hotpink; font-size: 2em;'
 const coolWarnStyle = 'background-color: darkred; color: white; font-style: italic; border: 5px solid hotpink; font-size: 2em;'
@@ -60,36 +54,34 @@ function ConsulHelper() {
 		return
     }
 
-	const onChangeServer = (serverName) => {
+	const onChangeServer = useCallback((serverName) => {
         const url = `http://127.0.0.1:8500/v1/kv/url/ms?dc=dc1&flags=0`
 		let port = Config.serverURLConfig.GeneratePort(serverName)
+		let command
 
-		setCheckBox((value) => {
-			let newCheckBox = {
-				...value,
-			}
+		let newCheckBox = {
+			...checkBox,
+		}
 
-			if (value[serverName]) {
-				delete newCheckBox[serverName]
-				invoke('stop_server',{ port: `${port}` }).then((message) => message && console.log(":-)", message))
+		if (checkBox[serverName]) {
+			delete newCheckBox[serverName]
+			invoke('stop_server',{ port: port }).then((message) => message && console.log(":-)", message))
+			command = `lsof -i :${port} | awk '{ if (NR!=1) { print $2;}}' | xargs kill -9`
+		} else {
+			newCheckBox[serverName] = true
 
-			} else {
-				newCheckBox[serverName] = true
-			}
+			let serverPath = `/Users/peter/p/ptd/backend/ms/${serverName}`
+			invoke('start_server',{ serverPath, port }).then((message) => message && console.log(":-)", message))
+			command = `cd /Users/peter/p/ptd/backend/ms/${serverName}; go run main.go -p ${port}`
+		}
 
-			return newCheckBox
-		})
-
-		let command = checkBox[serverName] ?
-		`lsof -i :${port} | awk '{ if (NR!=1) { print $2;}}' | xargs kill -9` :
-		`cd /Users/peter/p/ptd/backend/ms/${serverName}; go run main.go -p ${port}`
-
+		setCheckBox(newCheckBox);
 		copyToClipboard(command);
 		console.log(`%c${command}`, checkBox[serverName] ? coolWarnStyle : coolInfoStyle)
 
         invoke('fetch',{ invokeMessage: Config.serverURLConfig.GetNewSetting(), url }).then((message) => message && console.log(":)", message))
 		return
-    }
+    }, [checkBox])
 
 	return (
 		<div style={{padding: '20px 0 0 10px'}}>
