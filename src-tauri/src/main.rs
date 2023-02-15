@@ -6,36 +6,35 @@
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn my_custom_command(invoke_message: String) -> String {
-  format!("{}{}","Hello from Rust!" , invoke_message).into()
+    format!("{}{}", "Hello from Rust!", invoke_message).into()
 }
 
 use reqwest::Client;
-use std::str;
 use std::process::{Command, Output};
+use std::str;
 // use std::thread;
 // use std::time::Duration;
 use reqwest;
 
 #[tauri::command]
-async fn fetch(url: String, content: String)  {
-  let client= Client::new();
-  let res = client.put(url)
-  .body(content)
-  .send()
-  .await
-  .unwrap();
+async fn fetch(url: String, content: String) {
+    let client = Client::new();
+    let res = client.put(url).body(content).send().await.unwrap();
 
-
-  println!("Response status: {}", res.status());
+    println!("Response status: {}", res.status());
 }
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![my_custom_command, fetch, stop_server, start_server])
+        .invoke_handler(tauri::generate_handler![
+            my_custom_command,
+            fetch,
+            stop_server,
+            start_server
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
-
 
 // lsof -i :${port} | awk '{ if (NR!=1) { print $2;}}' | xargs kill -9
 #[tauri::command]
@@ -62,19 +61,18 @@ fn stop_server(port: i64) {
             .output()
             .expect("failed to execute process");
     }
-
 }
 
 // open -a iTerm . && sleep 1 && osascript -e 'tell application "iTerm2" to activate' -e 'tell application "iTerm2" to set currentSession to current session of current window' -e 'tell application "iTerm2" to tell currentSession to write text "cd /Users/peter/p/ptd/backend/ms/user"' -e 'tell application "iTerm2" to tell currentSession to write text "go run main.go"'
 #[tauri::command]
 fn start_server(server_path: String, port: i64) {
-    println!("sfsdf{}{}",server_path,port);
+    println!("sfsdf{}{}", server_path, port);
     let _ = Command::new("open")
-    .arg("-a")
-    .arg("iTerm")
-    .arg(".")
-    .output()
-    .expect("failed to execute process");
+        .arg("-a")
+        .arg("iTerm")
+        .arg(".")
+        .output()
+        .expect("failed to execute process");
 
     let _ = Command::new("sleep")
         .arg("1")
@@ -106,8 +104,6 @@ fn check_output(output: Output) -> Result<(), String> {
         Err(String::from_utf8_lossy(&output.stderr).to_string())
     }
 }
-
-
 
 // TODO 啟動後檢查，成功後返回前端
 // #[tauri::command]
