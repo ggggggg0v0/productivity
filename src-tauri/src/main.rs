@@ -17,10 +17,10 @@ use std::process::{Command, Output};
 use reqwest;
 
 #[tauri::command]
-async fn fetch(url: String, invoke_message: String)  {
+async fn fetch(url: String, content: String)  {
   let client= Client::new();
   let res = client.put(url)
-  .body(invoke_message)
+  .body(content)
   .send()
   .await
   .unwrap();

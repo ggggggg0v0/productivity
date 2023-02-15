@@ -1,10 +1,11 @@
 // src/App.tsx
 import { useState } from "react";
-import { invoke } from '@tauri-apps/api/tauri'
 import Config from '../config/config'
 import { useCallback } from "react";
+import { UpdateConsul, StartServer, StopServer } from '../repository'
 
 const LOCAL_IP = `10.28.12.128`
+const CONSUL_HOST = `http://127.0.0.1:8500`
 
 const serverList = [
     'bet-accumulator',
@@ -43,21 +44,21 @@ function ConsulHelper() {
     const onChange = (event) => {
         const arg = event.target.value.split('.')
         const [dbType, ms, env] = [arg[0], arg[1], arg[2]]
-        const url = `http://127.0.0.1:8500/v1/kv/storage/${dbType}/${ms}/promote-ms?dc=dc1&flags=0`
+        const url = `${CONSUL_HOST}/v1/kv/storage/${dbType}/${ms}/promote-ms?dc=dc1&flags=0`
 
-        invoke('fetch',{ invokeMessage: Config.Config[`${dbType}_${env}`], url }).then((message) => message && console.log(":)", message))
+		UpdateConsul(url, Config.Config[`${dbType}_${env}`])
 		return
     }
 
 	const onChangeRMQ = (event) => {
-        const url = `http://127.0.0.1:8500/v1/kv/storage/rmq/promote-ms?dc=dc1&flags=0`
+        const url = `${CONSUL_HOST}/v1/kv/storage/rmq/promote-ms?dc=dc1&flags=0`
 
-        invoke('fetch',{ invokeMessage: Config.Config[event.target.value], url }).then((message) => message && console.log(":)", message))
+		UpdateConsul(url, Config.Config[event.target.value])
 		return
     }
 
 	const onChangeServer = useCallback((serverName) => {
-        const url = `http://127.0.0.1:8500/v1/kv/url/ms?dc=dc1&flags=0`
+        const url = `${CONSUL_HOST}/v1/kv/url/ms?dc=dc1&flags=0`
 		let port = Config.serverURLConfig.GeneratePort(serverName)
 		let command
 
@@ -67,26 +68,31 @@ function ConsulHelper() {
 
 		if (checkBox[serverName]) {
 			delete newCheckBox[serverName]
-			invoke('stop_server',{ port: port }).catch((message) => message && console.log(":-)", message))
+			StopServer(port)
+				.catch((message) => console.log(":)", message))
 			command = `lsof -i :${port} | awk '{ if (NR!=1) { print $2;}}' | xargs kill -9`
 		} else {
 			newCheckBox[serverName] = port
-
 			let serverPath = `/Users/peter/p/ptd/backend/ms/${serverName}`
-			invoke('start_server',{ serverPath, port }).catch((message) => message && console.log(":-)", message))
+			StartServer(serverPath, port)
+				.catch((message) => console.log(":)", message))
 			command = `cd /Users/peter/p/ptd/backend/ms/${serverName}; go run main.go -p ${port}`
 		}
 
 		setCheckBox(newCheckBox);
 		copyToClipboard(command);
 
-        invoke('fetch',{ invokeMessage: Config.serverURLConfig.GetNewSetting(), url })
-		.then(() => {
-			const url = `http://127.0.0.1:8500/v1/kv/myservice/location?dc=dc1&flags=0`
-			invoke('fetch',{ invokeMessage: Config.GenerateNginxConfig(LOCAL_IP, newCheckBox), url })
-		})
-		.catch((message) => console.log(":)", message))
+		// TODO: 現在執行完 command 就修改 nginx 了，如果遇到服務啟動太久導致 nginx 無法正常啟動的狀況，就在這段加上需要驗證服務啟動的功能
+		UpdateConsul(url, Config.serverURLConfig.GetNewSetting())
+			.then(() => {
+				const url = `${CONSUL_HOST}/v1/kv/myservice/location?dc=dc1&flags=0`
+				UpdateConsul(url, Config.GenerateNginxConfig(LOCAL_IP, newCheckBox))
+			}
+		)
+
 		return
+		
+		
     }, [checkBox])
 
 	return (
