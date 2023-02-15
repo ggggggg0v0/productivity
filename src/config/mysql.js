@@ -1,7 +1,13 @@
 export default {
 
 	// Local
-	"mysql_local": ``,
+	"mysql_local": `host = "127.0.0.1:3306"
+account = "root"
+password = "testtest"
+dbname = "promoteMS"
+max_open_conns = 50
+max_idle_conns = 25
+max_conn_lifetime = "60s"`,
 
 	// DEV
 	"mysql_dev": `host = "10.30.4.114:3306"

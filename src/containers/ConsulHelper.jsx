@@ -4,6 +4,8 @@ import { invoke } from '@tauri-apps/api/tauri'
 import Config from '../config/config'
 import { useCallback } from "react";
 
+const LOCAL_IP = `10.28.12.128`
+
 const serverList = [
     'bet-accumulator',
     'bet-accumulator-audit',
@@ -65,21 +67,25 @@ function ConsulHelper() {
 
 		if (checkBox[serverName]) {
 			delete newCheckBox[serverName]
-			invoke('stop_server',{ port: port }).then((message) => message && console.log(":-)", message))
+			invoke('stop_server',{ port: port }).catch((message) => message && console.log(":-)", message))
 			command = `lsof -i :${port} | awk '{ if (NR!=1) { print $2;}}' | xargs kill -9`
 		} else {
-			newCheckBox[serverName] = true
+			newCheckBox[serverName] = port
 
 			let serverPath = `/Users/peter/p/ptd/backend/ms/${serverName}`
-			invoke('start_server',{ serverPath, port }).then((message) => message && console.log(":-)", message))
+			invoke('start_server',{ serverPath, port }).catch((message) => message && console.log(":-)", message))
 			command = `cd /Users/peter/p/ptd/backend/ms/${serverName}; go run main.go -p ${port}`
 		}
 
 		setCheckBox(newCheckBox);
 		copyToClipboard(command);
-		console.log(`%c${command}`, checkBox[serverName] ? coolWarnStyle : coolInfoStyle)
 
-        invoke('fetch',{ invokeMessage: Config.serverURLConfig.GetNewSetting(), url }).then((message) => message && console.log(":)", message))
+        invoke('fetch',{ invokeMessage: Config.serverURLConfig.GetNewSetting(), url })
+		.then(() => {
+			const url = `http://127.0.0.1:8500/v1/kv/myservice/location?dc=dc1&flags=0`
+			invoke('fetch',{ invokeMessage: Config.GenerateNginxConfig(LOCAL_IP, newCheckBox), url })
+		})
+		.catch((message) => console.log(":)", message))
 		return
     }, [checkBox])
 
@@ -88,6 +94,10 @@ function ConsulHelper() {
 				<div style={{display: 'flex'}}>
 					<div style={{flexBasis: '150px'}}>
 						<span>MySQL-Master</span>
+					</div>
+					<div>
+						<input name="mysql_master" value="mysql.master.local" type="radio" onChange={onChange} required />
+						<label>Local</label>
 					</div>
 					<div>
 						<input name="mysql_master" value="mysql.master.dev" type="radio" onChange={onChange} required />
@@ -106,6 +116,10 @@ function ConsulHelper() {
 				<div style={{display: 'flex'}}>
 					<div style={{flexBasis: '150px'}}>
 						<span>MySQL-Slave</span>
+					</div>
+					<div>
+						<input name="mysql_slave" value="mysql.slave.local" type="radio" onChange={onChange} required />
+						<label>Local</label>
 					</div>
 					<div>
 						<input name="mysql_slave" value="mysql.slave.dev" type="radio" onChange={onChange} required />
