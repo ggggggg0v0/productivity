@@ -9,12 +9,15 @@ import {
   DrawerOverlay,
   DrawerContent,
   useDisclosure,
+  Button,
 } from "@chakra-ui/react";
 
 import { HamburgerIcon } from "@chakra-ui/icons";
+import { work, relax } from "../containers/Flow";
 
 export default function Setting(props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isIntervalRunning, handleSetTime } = props;
 
   return (
     <>
@@ -37,11 +40,34 @@ export default function Setting(props) {
       >
         <DrawerOverlay />
         <DrawerContent>
-          <DrawerHeader borderBottomWidth="1px">Basic Drawer</DrawerHeader>
+          {/* <DrawerHeader borderBottomWidth="1px">Basic Drawer</DrawerHeader> */}
           <DrawerBody>
-            <p>Some contents...</p>
-            <p>Some contents...</p>
-            <p>Some contents...</p>
+            <p>Work</p>
+            {[5, 10, 15].map((el) => {
+              return (
+                <Button
+                  key={el}
+                  onClick={() => handleSetTime(work, el * 60)}
+                  style={{ margin: "10px" }}
+                  disabled={isIntervalRunning}
+                >
+                  {el}m
+                </Button>
+              );
+            })}
+            <p>Relax</p>
+            {[5, 10, 15].map((el) => {
+              return (
+                <Button
+                  key={el}
+                  onClick={() => handleSetTime(relax, el * 60)}
+                  style={{ margin: "10px" }}
+                  disabled={isIntervalRunning}
+                >
+                  {el}m
+                </Button>
+              );
+            })}
           </DrawerBody>
         </DrawerContent>
       </Drawer>

@@ -15,3 +15,14 @@ TODO:
     - [ ] close the iTerm window when unchecked. (is available?)
   - [x] click server name and modify consul url with new port
   - [ ] add nginx for postman to proxy localhost/{server} -> {server}:port 
+
+## Step
+
+Prepare
+- npm i
+
+Start
+- cargo tauri dev
+
+Build
+- cargo tauri build

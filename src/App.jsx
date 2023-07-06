@@ -1,5 +1,6 @@
+// src/App.tsx
 import { useEffect, useState, useCallback } from "react";
-import "./App.css";
+import "./App.css"
 
 import ConsulHelper from "./containers/ConsulHelper";
 import Flow from "./containers/Flow";
@@ -7,7 +8,7 @@ import Flow from "./containers/Flow";
 const pages = [<Flow />, <ConsulHelper />];
 
 export default () => {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
 
   const handleKeyPress = useCallback(
     (event) => {
@@ -34,3 +35,4 @@ export default () => {
 
   return pages[page];
 };
+
